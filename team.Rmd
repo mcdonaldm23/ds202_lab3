@@ -6,6 +6,10 @@ author: "Maureen McDonald and Omima Hassan"
 date: "09/26/2019"
 output: html_document
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+library(tidyverse)
+```
 
 
 ## Background
@@ -21,36 +25,127 @@ The General Social Survey (GSS) has been run by NORC every other year since 1972
 
 Now it's important to understand what each column stands for. You can find a codebook with explanations for each of the variables at https://gssdataexplorer.norc.org/
 
+Load the data set HAPPY:
+```{r}
+happy1 <- readRDS("HAPPY.rds")
+names(happy1) = tolower(names(happy1))
+head(happy1)
+```
+
+
 ## Data Cleaning 
 
 Initial exploration revealed that some data processing was needed before we could proceed with further visualization. All missing values were encoded with 'NA' as follows:
+
 ```{r}
-#insert relevant R code for Q1 here
+views_IAP= which(happy1$polviews == "IAP")
+happy1$polviews[views_IAP]= "NA"
+
+views_DK = which(happy1$polviews== "DK")
+happy1$polviews[views_DK]= "NA"
+
+views_NA = which(happy1$polviews== "NA")
+happy1$polviews[views_NA]= "NA"
+
+degree_Dk = which(happy1$degree== "DK")
+happy1$degree[degree_Dk]= "NA"
+
+degree_NA = which(happy1$degree== "NA")
+happy1$degree[degree_NA]= "NA"
+
+finance_IAP= which(happy1$finrela== "IAP")
+happy1$finrela[finance_IAP]= "NA"
+
+finance_DK= which(happy1$finrela== "DK")
+happy1$finrela[finance_DK]= "NA"
+
+finance_NA= which(happy1$finrela== "NA")
+happy1$finrela[finance_NA]= "NA"
+
+age_DK = which(happy1$age== "DK")
+happy1$age[age_DK]= "NA"
+
+health_DK= which(happy1$health== "DK")
+happy1$health[health_DK]= "NA"
+
+health_IAP= which(happy1$health== "IAP")
+happy1$health[health_IAP]= "NA"
+
+health_NA= which(happy1$health== "NA")
+happy1$health[health_NA]= "NA"
+
+party_DK= which(happy1$partyid== "DK")
+happy1$partyid [party_DK]= "NA"
+
+party_NA= which(happy1$partyid== "NA")
+happy1$partyid [party_NA]= "NA"
 ```
 
-In total there were `....` number of missing values for the following `....` variables. 
+In total, there were 30,272 number of missing values for the following 6 variables. 
 
 Variables were also cast into the correct type in order to ease data visualization. This was done by:
 ```{r}
-#insert relevant R code for Q2 here
+newage= happy1$age= as.numeric(happy1$age)
+happy1$age[newage]= 89
+table(happy1$age)
 ```
 
 Factors were also organized into meaningful order as follows: 
 ```{r}
-#insert relevant R code for Q3 here
+status = happy1 %>% group_by(marital) %>% summarize(mean_age= mean(age,na.rm=TRUE),sd_age= sd(age, na.rm=TRUE))
+status
+```
+```{r}
+money = happy1 %>% group_by(finrela) %>% summarize(mean_age= mean(age,na.rm=TRUE),sd_age= sd(age, na.rm=TRUE))
+money
+```
+
+```{r}
+party= happy1 %>% group_by(partyid) %>% summarise(mean_age= mean(age, na.rm= TRUE),sd_age= sd(age, na.rm=TRUE))
+party
 ```
 
 
 ## Data Exploration 
 
-Two variables of interest are `...` and `...`. Their distributions are as follow: 
+Two variables of interest are Marriage Status and Sex. Their distributions are as follow: 
 ```{r}
-#insert relevant R code here
-#include graphics. DESCRIBE your plot in context. Make sure it includes axis labels and appropriate title. 
+ggplot(happy1,aes(marital, fill=sex)) + geom_bar()+ labs(title= "Marriage Status Amoung Sexes", x= "Marriage Status", y= "Number of People", fill= "Sex")
+```
+```{r}
+ggplot(happy1,aes(marital, fill=sex)) + geom_bar(position='fill')+ labs(title= "Marriage Status Amoung Sexes", x= "Marriage Status", y= "Number of People", fill= "Sex")
 ```
 
-The distribution for `...` is `....`, suggesting that `....` 
+The distribution for Marriage Status is determinded by sex, suggesting that in most categories except for those who are widowed and divorced, the proportions are about the same between male and female. Widowed, however, are more prone to being female. Majority of the population are those who are married.
 
 
+
+
+
+
+Two variables of interest are Happiness and Marriage Status. Their distributions are as follow: 
+
+```{r}
+ggplot(happy1,aes(marital, fill= happy)) + geom_bar()+ labs(title= "Marriage Status Verse Happiness", x= "Marriage Status", y= "Number of People", fill= "Scale of Happiness")
+```
+
+```{r}
+ggplot(happy1,aes(marital, fill= happy)) + geom_bar(position='fill')+ labs(title= "Marriage Status Verse Happiness", x= "Marriage Status", y= "Number of People", fill= "Scale of Happiness")
+```
+
+The distribution for Marriage Status is determinded by Happiness, suggesting that in most categories the proportions of pretty happy are about the same between the marriage statuses. People who are married, however, have higher proportions of very happy and lower of not too happy. People who are seperated have higher proportions of not too happy
+
+
+
+
+
+
+Two variables of interest are Age and Marriage Status. Their distributions are as follow: 
+
+```{r}
+ggplot(happy1,aes(marital, age)) + geom_boxplot()+ labs(title= "Marriage Status Amoung Ages", x= "Marriage Status", y= "Age")
+```
+
+The distribution for Marriage Status is determinded by age, suggesting that in most categories except for those who are widowed and never married, the proportions are about the same between the ages. Widowed, however, are more prone to being older, over 60 with the median being above 70. While people who have never been married are prone to being younger, under 40 with the median being under 30.
 
 
